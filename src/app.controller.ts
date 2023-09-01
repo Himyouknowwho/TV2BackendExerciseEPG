@@ -11,7 +11,7 @@ export class AppController {
     return this.appService.getHello();
   }
   @Get('parse')
-  parseProgram(@Req() request: Request): string {
-    return this.appService.parseEPG(request);
+  parseEPG(@Req() request: Request): string {
+    return this.appService.parseEPG(request.body);
   }
 }
