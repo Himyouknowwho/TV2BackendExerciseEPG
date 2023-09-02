@@ -1,14 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { toDate } from 'date-fns';
 
-//TODO: need to find a way to cluster shows with multiple runtimes a day together
-//NOTE: we can propably expect the input list to always have the show start and end time paired in chronological order.
-//NOTE: i want to be agnostic of days of week... if the input list starts on a sunday, then it would not return correctly
-//TODO:need a way to link shows that span multiple days...
-
-//TODO:function for composing a show object
-// should it be an object containing all runtimes on a day,
-//or should it be that each show runtime becomes an object
 interface showInstance {
   title: string;
   day?: string;
