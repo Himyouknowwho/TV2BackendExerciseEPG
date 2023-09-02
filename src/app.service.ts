@@ -10,14 +10,14 @@ interface showInstance {
   startClock?: string;
   endClock?: string;
 }
-interface runtime {
-  startTime: string;
-  endTime: string;
-}
 interface show {
   title: string;
   day: string;
   runtimes: runtime[];
+}
+interface runtime {
+  startTime: string;
+  endTime: string;
 }
 const weekDays = [
   'monday',
@@ -127,8 +127,8 @@ export class AppService {
     const date = toDate(seconds * 1000);
     const timeString = date.toISOString().split('T')[1].split(':');
 
-    return `${timeString[0]}${
-      timeString[1] !== '00' ? ':' + timeString[1] : ''
-    }`;
+    return `${
+      timeString[0].charAt(0) === '0' ? timeString[0].charAt(1) : timeString[0]
+    }${timeString[1] !== '00' ? ':' + timeString[1] : ''}`;
   }
 }
