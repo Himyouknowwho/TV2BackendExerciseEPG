@@ -95,6 +95,7 @@ export class AppService {
         }
         result += ' / ';
       });
+      result = result.substring(0, result.length - 3);
     } else {
       result += 'Nothing aired today';
     }
