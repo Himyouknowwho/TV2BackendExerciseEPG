@@ -33,7 +33,7 @@ export class AppService {
   getHello(): string {
     return 'Hello World!';
   }
-  parseEPG(programJSON: JSON): any {
+  parseEPG(programJSON: JSON): string {
     const program = programJSON;
 
     //create show objects from each start and end of show
