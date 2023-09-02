@@ -87,9 +87,13 @@ export class AppService {
     if (showList.length > 0) {
       showList.forEach((show) => {
         result += `${show.title} `;
-        show.runtimes.forEach((runtime) => {
-          result += `${this.readableRuntime(runtime)}, `;
-        });
+        for (let i = 0; i < show.runtimes.length; i++) {
+          result += `${this.readableRuntime(show.runtimes[i])}`;
+          if (i + 1 < show.runtimes.length) {
+            result += ', ';
+          }
+        }
+        result += ' / ';
       });
     } else {
       result += 'Nothing aired today';
