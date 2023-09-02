@@ -19,9 +19,6 @@ describe('AppController', () => {
     const baseURL = 'http://localhost:3000/';
     const baseAPIRequest = request(baseURL);
 
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
     it('should return a days program in a human readable form', async () => {
       const req = await baseAPIRequest
         .post('epg/parse')

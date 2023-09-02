@@ -30,9 +30,6 @@ const weekDays = [
 ];
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
-  }
   parseEPG(programJSON: JSON): string {
     const program = programJSON;
 
@@ -48,6 +45,7 @@ export class AppService {
       });
     }
 
+    //compose showslist with all of their runtimes on each of their given days
     const showList: show[] = [];
     for (let i = 0; i < showInstanceList.length; i++) {
       if (
