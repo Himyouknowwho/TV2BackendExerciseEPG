@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Request } from 'express';
 import { toDate } from 'date-fns';
 
-  //TODO: need to find a way to cluster shows with multiple runtimes a day together
-  //NOTE: we can propably expect the input list to always have the show start and end time paired in chronological order.
-  //NOTE: i want to be agnostic of days of week... if the input list starts on a sunday, then it would not return correctly
-  //TODO:need a way to link shows that span multiple days...
+//TODO: need to find a way to cluster shows with multiple runtimes a day together
+//NOTE: we can propably expect the input list to always have the show start and end time paired in chronological order.
+//NOTE: i want to be agnostic of days of week... if the input list starts on a sunday, then it would not return correctly
+//TODO:need a way to link shows that span multiple days...
 
-  //TODO:function for composing a show object
-  // should it be an object containing all runtimes on a day,
-  //or should it be that each show runtime becomes an object
+//TODO:function for composing a show object
+// should it be an object containing all runtimes on a day,
+//or should it be that each show runtime becomes an object
 interface showInstance {
   title: string;
   day?: string;
@@ -28,7 +27,15 @@ interface show {
   day: string;
   runtimes: runtime[];
 }
-
+const weekDays = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
 @Injectable()
 export class AppService {
   getHello(): string {
@@ -36,6 +43,8 @@ export class AppService {
   }
   parseEPG(programJSON: JSON): any {
     const program = programJSON;
+
+    //create show objects from each start and end of show
     const showInstanceList: Array<showInstance> = [];
     for (const [day, value] of Object.entries(program)) {
       const list = value as Array<showInstance>;
@@ -57,13 +66,53 @@ export class AppService {
           showInstanceList[i],
           showInstanceList[i + 1],
         );
-        if ()
-        showList.push(show);
+        // check if this show already has a spot on the given day, and merge in runtime to runtimelist if true
+        const indexOfShow = showList.findIndex(
+          (element) => element.day === show.day && element.title === show.title,
+        );
+        if (indexOfShow > -1) {
+          showList[indexOfShow].runtimes.push(show.runtimes[0]);
+        } else {
+          showList.push(show);
+        }
       }
     }
-    console.log('shows', showList);
-    return showList;
-    // return 'Monday: Nyhederne 6 – 10 / Dybvaaaaad 10 – 10:35';
+    let result = '';
+    weekDays.forEach((day) => {
+      result +=
+        this.makeDayHumanReadable(day, this.filterByDay(showList, day)) + '\n';
+    });
+
+    return result;
+  }
+
+  uppercaseFirstLetter(string: string): string {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  makeDayHumanReadable(day: string, showList: show[]): string {
+    let result = `${this.uppercaseFirstLetter(day)}: `;
+    if (showList.length > 0) {
+      showList.forEach((show) => {
+        result += `${show.title} `;
+        show.runtimes.forEach((runtime) => {
+          result += `${this.readableRuntime(runtime)}, `;
+        });
+      });
+    } else {
+      result += 'Nothing aired today';
+    }
+    return result;
+  }
+
+  readableRuntime(runtime: runtime): string {
+    return runtime.startTime + ' - ' + runtime.endTime;
+  }
+
+  filterByDay(showList: show[], day: string): any {
+    return showList.filter((show) => {
+      return show.day === day;
+    });
   }
 
   composeShowFromInstances(
@@ -81,6 +130,7 @@ export class AppService {
     };
     return show;
   }
+
   getClockFromSeconds(seconds: number): string {
     const date = toDate(seconds * 1000);
     const timeString = date.toISOString().split('T')[1].split(':');
