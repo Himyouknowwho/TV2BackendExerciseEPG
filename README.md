@@ -1,78 +1,70 @@
 # TV2BackendExerciseEPG
 TV2 Backend Exercise - Electronic Program Guide
 
+## Part 1: Create a webservice
+For this exercise, I have decided to use Nest to easily and conveniently set up a HTTP service.
 
-
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
+Install the required dependencies before running the service:
 ```bash
 $ npm install
 ```
 
-## Running the app
-
+Start the service with:
 ```bash
-# development
 $ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
+Send a POST request to:
+```
+http://localhost:3000/epg/parse
+```
+with the JSON formatted program guide in the request body. The service will then respond with a string containing the human readable program guide.
+### Testing
+I also wrote tests for this, testing two test cases:
+- 1: Only parse one day's program
+- 2: Parse the full week program provided in the exercise
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
+To run the test, use:
+ ```bash
 $ npm run test:e2e
+```
+You can read the test specification in: /test/app.e2e-spec.ts
+### Building and Deployment
 
-# test coverage
-$ npm run test:cov
+I have created both Dockerfile and docker-compose file for this service for easy building and deployment.
+
+Build service with docker build
+> Note: the Dockerfile requires a npm auth token to be able to install node packages
+ ```bash
+$ docker build -t epgparser --build-arg NPM_TOKEN=< YOUR NPM TOKEN HERE > .
 ```
 
-## Support
+Or Build with docker compose:
+> Note: the NPM_TOKEN variable needs to be set as a environment variable before running this compose build. Otherwise the token can be placed in the docker compose file as a build argument for the service.
+ ```bash
+$ env NPM_TOKEN=< YOUR NPM TOKEN HERE > docker compose build
+``` 
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+Run service with docker compose:
+ ```bash
+$ docker compose up -d 
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Part 2: My thoughts on the input data model
+I would change the input model, such that each show instance or runtime (begin state and end state pair) would be one object. Each of those objects should then contain both the start time and the end time, such that it becomes one block. I assume that no program will ever overlap with one another, so those two list entries containing start time and end time might as well be one entry containing both times. I would also include the information on the program start day.
 
-## License
+There are two significant parts of my service implementation. First, I iterate through the input list to create show objects and join the runtimes in one list under the show's data, if it occurs more than once a given day. Then I parse the new show object array to human readable text.
+
+Seen in the two pictures below is the original format for monday (Left), and the way my service is parsing the list, before making it human readable (Right). In this implementation, each show contains the title, the starting day, and a list of runtimes for that day.
+
+| Original input format |  My rendition of the program list |
+|-----------------------|----------------------------------|
+|![](image-1.png)| ![](image-2.png)|
+
+
+## Author
+
+- Author - Andreas Andersen
+## Nest License
 
 Nest is [MIT licensed](LICENSE).
