@@ -1,0 +1,15 @@
+version: "3.8"
+services: 
+  epg_parser_service:
+    image: epgparser:latest
+    container_name: epg_parser_service
+    ports: 
+    - 3000:3000
+    build:
+     context: ./
+     args: 
+      - NPM_TOKEN
+      # remember to set env variable for NPM_TOKEN locally
+networks:
+  default:
+    name: network
